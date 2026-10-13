@@ -2,11 +2,16 @@
    Jack McEntee 의 규칙: 12px 가장자리 · 4열 12px 격자 · 캡션(이름 / 둘째 줄) + 아래 선 · 원본 비율 사진(자르지 않음) ·
    열린 카드 하나만 3열로 · 큰 문장 · 화면 아래 고정 메뉴. 색 hex 0, 서체는 아래 짝에서만. */
 
-/* ── 서체 짝 (--my-type → html.t-*) — 본문 기본 고딕(§I-4) ── */
-:root { --ca-f-head: 'Pretendard Variable', Pretendard, sans-serif; --ca-f-body: 'Pretendard Variable', Pretendard, sans-serif;
-  --ca-f-num: 'Newsreader', 'Noto Serif KR', serif; --ca-w-head: 600; --ca-w-disp: 700; --ca-w-body: 400; }
+@font-face { font-family: 'Geist'; font-style: normal; font-weight: 100 900; font-display: swap; src: url('assets/fonts/geist_variable.ttf') format('truetype'); }
+@font-face { font-family: 'Geist Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url('assets/fonts/geist_mono_400.ttf') format('truetype'); }
+@font-face { font-family: 'Geist Mono'; font-style: normal; font-weight: 600; font-display: swap; src: url('assets/fonts/geist_mono_600.ttf') format('truetype'); }
+@font-face { font-family: 'Geist Mono'; font-style: normal; font-weight: 700; font-display: swap; src: url('assets/fonts/geist_mono_700.ttf') format('truetype'); }
+
+/* ── 서체 짝 (--my-type → html.t-*) ── */
+:root { --ca-f-head: 'Geist', sans-serif; --ca-f-body: 'Geist', sans-serif;
+  --ca-f-num: 'Geist', sans-serif; --ca-w-head: 600; --ca-w-disp: 600; --ca-w-body: 400; }
 .t-serif { --ca-f-head: 'Noto Serif KR', serif; --ca-f-body: 'Noto Serif KR', serif; --ca-w-disp: 600; }
-.t-mono { --ca-f-head: 'IBM Plex Mono', 'Nanum Gothic Coding', monospace; --ca-f-body: 'IBM Plex Mono', 'Nanum Gothic Coding', monospace; --ca-f-num: 'IBM Plex Mono', monospace; --ca-w-disp: 600; }
+.t-mono { --ca-f-head: 'Geist Mono', monospace; --ca-f-body: 'Geist Mono', monospace; --ca-f-num: 'Geist Mono', monospace; --ca-w-disp: 600; }
 .t-hand { --ca-f-head: 'Jua', sans-serif; --ca-f-body: 'Gowun Dodum', sans-serif; --ca-w-head: 400; --ca-w-disp: 400; }
 
 /* ── 390 크기 · 밀도 ── */
@@ -63,7 +68,7 @@ section[id], header[id], div[id] { scroll-margin-top: calc(var(--ca-gnb-h) + 12p
 .ca-top--hero + main > .ca-sec:first-child { margin-top: var(--ca-s3); }
 
 /* ── 장 공통 머리 (모든 장 같은 문법: 위 굵은 선(진행 막대·현재 메뉴와 같은 2px) → 장 이름 → 장 문장, 왼쪽에 위아래로 쌓기 → 아래 선) ── */
-.ca-sec { margin-top: var(--ca-s3); padding: 0 var(--ca-gut); }   /* 장 사이 = s3 만. 장 안은 s2 이하 */
+.ca-sec { margin-top: var(--ca-s2); padding: 0 var(--ca-gut); }   /* 장 끝 여백도 일반 블록 간격과 통일 */
 .ca-head { display: block; padding-top: var(--ca-hd1); border-top: var(--ca-hair) solid var(--ca-ink); }   /* 2026-10-07 교수 지시: 장 구분선 더 얇게 2px → 1px */   /* 장 머리: 굵은 선 —(넓게 hd1)— [장 이름 —(좁게 hd2)— 큰 문장] */   /* 장 머리 선 = 위 2px 하나만(아래 선 삭제, 2026-10-07) */
 .ca-label { font: var(--ca-w-head) var(--ca-name)/var(--ca-name-lh) var(--ca-f-head); }
 .ca-lead { margin-top: var(--ca-hd2); font: var(--ca-w-head) var(--ca-lead)/var(--ca-lead-lh) var(--ca-f-head); letter-spacing: -.01em; max-width: 36em; text-wrap: pretty; }
@@ -135,7 +140,8 @@ section[id], header[id], div[id] { scroll-margin-top: calc(var(--ca-gnb-h) + 12p
 /* ── 상세 (카드를 누르면 바탕색으로 덮였다가 상세가 선다 — 원 작업 페이지) ── */
 .ca-detail { position: fixed; inset: 0; z-index: 90; overflow-y: auto; overscroll-behavior: contain; background: var(--ca-paper); color: var(--ca-ink);
   opacity: 0; visibility: hidden; transition: opacity var(--ca-t-fade) var(--ca-e1), visibility 0s linear var(--ca-t-fade); }
-.ca-detail.is-on { opacity: 1; visibility: visible; transition: opacity var(--ca-t-fade) var(--ca-e1), visibility 0s; }
+.ca-detail { pointer-events: none; }
+.ca-detail.is-on { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity var(--ca-t-fade) var(--ca-e1), visibility 0s; }
 .ca-d-in { padding: var(--ca-s1) var(--ca-gut) calc(var(--ca-s2) * 2); }
 .ca-d-head > * { padding-bottom: var(--ca-s1); border-bottom: var(--ca-hair) solid var(--ca-ink); min-height: 100%; }
 .ca-d-head { align-items: start; }   /* 기준선은 sig.js 가 맞춘다(§I-7) */
@@ -230,9 +236,9 @@ html.ca-lock, html.ca-lock body { overflow: hidden; }
 .ca-r:last-child { border-bottom: 0; }   /* 마지막 행은 하단 바 위 선이 닫는다 */
 main > section:last-child:not(:has(.ca-rows)) { padding-bottom: var(--ca-s2); }
 
-/* 상단 고정 바 — 제목 2단 | 장 메뉴 다섯 칸 × 2단(4장 탭과 같은 세로선). 선 없음, 지금 장 칸만 아래 굵은 선(현재 위치 예외) */
+/* 상단 고정 바 — 이름은 왼쪽, 장 메뉴는 오른쪽에 모아 정렬 */
 .ca-gnb { position: fixed; left: 0; top: 0; z-index: 60; width: 100%; padding: 0 var(--ca-gut); background: var(--ca-paper); color: var(--ca-ink);
-  font: var(--ca-w-head) var(--ca-label)/var(--ca-bar-lh) var(--ca-f-head); letter-spacing: var(--ca-bar-ls); }
+  font: var(--ca-w-head) var(--ca-label)/var(--ca-bar-lh) var(--ca-f-head); letter-spacing: var(--ca-bar-ls); box-shadow: inset 0 calc(-1 * var(--ca-hair)) 0 0 currentColor; }
 .ca-bar-b { position: fixed; left: 0; bottom: 0; z-index: 60; width: 100%; padding: 0 var(--ca-gut); background: var(--ca-paper); color: var(--ca-ink);
   font: var(--ca-w-head) var(--ca-label)/var(--ca-bar-lh) var(--ca-f-head); letter-spacing: var(--ca-bar-ls);
   display: grid; grid-template-columns: repeat(var(--ca-cols), minmax(0, 1fr)); column-gap: var(--ca-gap); box-shadow: inset 0 var(--ca-hair) 0 0 var(--ca-ink); }   /* 위 경계 = 선 하나 */
@@ -241,9 +247,10 @@ main > section:last-child:not(:has(.ca-rows)) { padding-bottom: var(--ca-s2); }
 }
 .ca-gnb.on-hero { background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; color: var(--ca-gnb-c, var(--ca-paper)); }
 .ca-gnb-row { display: grid; grid-template-columns: repeat(var(--ca-cols), minmax(0, 1fr)); column-gap: var(--ca-gap); align-items: start; }
-.ca-gnb-name { grid-column: 1 / span 2; padding: 12px 0; min-height: 44px; min-width: 0; overflow-wrap: anywhere; }
-.ca-gnb .ca-menu { grid-column: 3 / -1; display: grid; grid-template-columns: subgrid; }
-.ca-menu a { grid-column: span 2; position: relative; display: block; min-width: 0; padding: 12px 0; min-height: 44px; white-space: nowrap; }
+.ca-gnb-name { grid-column: 1 / span 2; display: flex; align-items: center; min-height: 44px; min-width: 0; overflow-wrap: anywhere; }
+.ca-gnb-btn { display: none; }
+.ca-gnb .ca-menu { grid-column: 3 / -1; display: flex; justify-content: flex-end; gap: clamp(24px, 3vw, 48px); }
+.ca-menu a { position: relative; display: flex; align-items: center; min-width: 0; min-height: 44px; white-space: nowrap; }
 .ca-menu a span { display: inline-block; transition: transform var(--ca-t-nudge) var(--ca-e2); }
 /* 현재 위치 = 글자색(먹 / 흐린 먹). 밑줄·굵은 선 쓰지 않음 (2026-10-07 교수 지시) */
 /* 상단 장 메뉴: 모든 칸 같은 진한 글자(현재 위치도 색으로 구분하지 않음, 2026-10-07 교수 지시). aria-current는 접근성용으로만 유지 */
@@ -254,9 +261,18 @@ main > section:last-child:not(:has(.ca-rows)) { padding-bottom: var(--ca-s2); }
 @media (hover: hover) { .ca-bar-b a { transition: transform var(--ca-t-nudge) var(--ca-e2); } .ca-bar-b a:hover { transform: translateX(6px); } }
 .ca-top:not(.ca-top--hero) { padding-top: calc(var(--ca-gnb-h) + var(--ca-s2)); }   /* 사진 없는 첫 화면: 바 아래에서 시작 */
 @media (max-width: 768px) {
-  .ca-gnb-name { grid-column: 1 / -1; padding-bottom: 0; }
-  .ca-gnb .ca-menu { grid-column: 1 / -1; display: flex; }   /* 390: 다섯 칸 같은 폭(4단에 5칸은 나눠지지 않아 예외) */
-  .ca-gnb .ca-menu a { flex: 1 1 0; }
+  .ca-gnb-name { grid-column: 1 / span 3; }
+  .js .ca-gnb-btn { grid-column: 4; justify-self: end; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2.5px; width: 44px; height: 44px; }
+  .ca-gnb-btn span { display: block; width: 1em; height: 1.5px; background: currentColor; transition: transform .2s ease, opacity .2s ease; }
+  .ca-gnb-btn[aria-expanded="true"] span:first-child { transform: translateY(4px) rotate(45deg); }
+  .ca-gnb-btn[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+  .ca-gnb-btn[aria-expanded="true"] span:last-child { transform: translateY(-4px) rotate(-45deg); }
+  .ca-gnb .ca-menu { grid-column: 1 / -1; display: block; }
+  .js .ca-gnb .ca-menu { position: absolute; top: 100%; left: 0; right: 0; display: block; padding: 8px var(--ca-gut) 12px; background: var(--ca-paper); color: var(--ca-ink); max-height: calc(100dvh - 44px); overflow-y: auto; border-bottom: var(--ca-hair) solid var(--ca-ink);
+    opacity: 0; visibility: hidden; transform: translateY(-8px); pointer-events: none; transition: opacity .22s var(--ca-e2), transform .22s var(--ca-e2), visibility 0s linear .22s; }
+  .js .ca-gnb.is-open .ca-menu { opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto; transition-delay: 0s; }
+  .ca-gnb.is-open { background: var(--ca-paper); color: var(--ca-ink); }
+  .ca-gnb .ca-menu a { min-height: 48px; display: flex; align-items: center; font-size: 15px; }
   .ca-bar-b > :nth-child(1) { grid-column: 1 / span 1; } .ca-bar-b > :nth-child(2) { grid-column: 2 / span 2; } .ca-bar-b > :nth-child(3) { grid-column: 4 / span 1; }
 }
 
@@ -381,6 +397,9 @@ main > section:last-child:not(:has(.ca-rows)) { padding-bottom: var(--ca-s2); }
 @media (prefers-reduced-motion: reduce) { .ca-track.is-slide { scroll-behavior: auto; } }
 
 /* 상세 v3 (2026-10-07) — 사진 먼저 → 글 묶음(1–8단, 왼쪽 시작) → Prev/Next. 머리 줄 칸 나눔·선 없음 */
+.ca-d-toolbar { position: sticky; top: 0; z-index: 3; padding: 0 var(--ca-gut); background: var(--ca-paper); }
+.ca-d-back { min-height: 44px; padding: 0 8px; font-weight: 600; }
+.ca-d-back:hover { text-decoration: underline; text-underline-offset: 4px; }
 .ca-d-in { padding-top: var(--ca-s1); }
 .ca-d-grid { margin-top: 0 !important; }
 .ca-d-txt { margin-top: var(--ca-c1); max-width: calc((100% - 11 * var(--ca-gap)) / 12 * 8 + 7 * var(--ca-gap)); }
@@ -391,6 +410,11 @@ main > section:last-child:not(:has(.ca-rows)) { padding-bottom: var(--ca-s2); }
 .ca-d-nav { margin-top: var(--ca-s2); }
 @media (max-width: 768px) { .ca-d-txt { max-width: none; } .ca-d-why { font-size: 16px; } }
 .ca-d-grid img { width: auto; max-width: 100%; max-height: 60vh; aspect-ratio: auto; object-fit: contain; }   /* 상세 사진 = 원본 비율, 화면 60% 높이 안 — 아래 글 묶음이 첫 화면에 같이 보이게 */
+.ca-detail.is-objects .ca-d-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 760px; }
+.ca-detail.is-objects .ca-d-grid figure { grid-column: auto; height: min(36vh, 320px); }
+.ca-detail.is-objects .ca-d-grid img { width: 100%; height: 100%; max-height: 100%; object-fit: contain; }
+.ca-detail.is-objects .ca-d-txt { margin-top: 24px; }
+@media (max-width: 768px) { .ca-detail.is-objects .ca-d-grid figure { height: min(26vh, 200px); } }
 
 /* 3장 공간 고르기 = 장 머리 안(장 이름 2단 | 공간 셋 × 2단). 현재 = 먹, 나머지 = 흐린 먹, 선 없음. 4장 탭 줄은 삭제 → 카드 타이틀 앞 [01] */
 .ca-track[data-index] { counter-reset: ca-item; }
@@ -422,6 +446,9 @@ main > section:last-child:not(:has(.ca-rows)) { padding-bottom: var(--ca-s2); }
 /* More 버튼 글자 11px (2026-10-07 교수 지시: 모든 More 작게). 누르는 면은 44px 유지 */
 .ca-more { font-size: 11px; line-height: 1.3; gap: 6px; }
 
+/* 탐색 메뉴·이름·푸터·Back·More는 기존 고정폭 서체 유지 */
+.ca-gnb, .ca-bar-b, .ca-d-back, .ca-more { font-family: 'Geist Mono', monospace; }
+
 /* 서브카피 2~5줄 (2026-10-07) — 카드 = 요약 관찰(.ca-when), 상세 = 해석(.ca-why)만. 같은 문장을 두 번 보이지 않는다 */
 .ca-track.is-slide .ca-when { max-width: 36em; }   /* 3장 풀폭 카드: 한 줄 약 36자 */
 .ca-d-when { display: none !important; }
@@ -438,11 +465,13 @@ main > section:last-child:not(:has(.ca-rows)) { padding-bottom: var(--ca-s2); }
 .ca-sec:not(.ca-split) > .ca-head { padding-top: var(--ca-hd1); }
 .ca-sec.ca-split { padding-top: var(--ca-hd1); }
 
-/* ══ 3장 공간 = 흩뿌린 칸 (W07-B 흩뿌림형 3장에서 이식 · 원 레퍼런스 lisovskiy.work · 2026-10-07) — 풀폭 슬라이드를 대체 ══
-   1280: 공간 목록 1–4단 | 칸 밭 5–12단(8열, 칸 = 1열 정사각, 원 9열 무늬 4~9열 → 1·2·4·5·7·8열). 390: 목록 → 칸 밭 3열 */
+/* Each place owns two photo rows, with its label aligned to the first row. */
 .ca-scatter { --ca-sc-t: .3s; --ca-sc-stagger: 15ms; --ca-sc-hover: 1.05; }
 @media (max-width: 768px) { .ca-scatter { --ca-sc-stagger: 50ms; } }
 .ca-track[data-scatter] { position: static; height: auto !important; overflow: visible; display: flex; flex-direction: column; gap: var(--ca-s2); }
+.ca-space-group { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--ca-gap); align-items: start; }
+.ca-space-group > .ca-card { grid-column: 1 / span 4; }
+.ca-space-group > .ca-field { grid-column: 5 / -1; }
 .ca-track[data-scatter] .ca-card { position: static; width: auto !important; display: block; }
 .ca-track[data-scatter] .ca-figs, .ca-track[data-scatter] .ca-fig { display: none !important; }   /* 사진은 오른쪽 칸 밭에만 */
 .ca-track[data-scatter] .ca-body { display: block; opacity: 1; visibility: visible; padding: 0; }
@@ -453,29 +482,30 @@ main > section:last-child:not(:has(.ca-rows)) { padding-bottom: var(--ca-s2); }
 .ca-track[data-scatter] .ca-more { margin-top: calc(var(--ca-c3) - 12px); }
 .ca-scatter.is-linking .ca-track[data-scatter] .ca-card:not(.is-hot) { opacity: .68; }   /* 흐린 먹 약 5.1:1 */
 .ca-field { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); column-gap: var(--ca-gap); row-gap: var(--ca-gap); grid-auto-flow: row; }
-.ca-cell { position: relative; display: grid; place-items: center; width: 100%; aspect-ratio: 1 / 1; padding: 0; overflow: visible; grid-column-start: var(--dcs, auto);
+.ca-cell { position: relative; display: grid; place-items: center; justify-self: center; width: var(--photo-width, 100%); margin-top: var(--photo-drop, 0px); aspect-ratio: 1 / 1; padding: 0; overflow: visible; grid-column-start: var(--dcs, auto); grid-row-start: var(--row, auto);
   transition: transform var(--ca-sc-t) var(--ca-e1), opacity var(--ca-sc-t) var(--ca-e1); }
 .ca-cell::before { content: ""; position: absolute; top: 50%; left: 50%; width: 4px; height: 4px; margin: -2px; border-radius: 50%; background: var(--ca-ink); }   /* 원 a::before — 접혀 있을 때 자리 */
 .ca-cell img { position: relative; width: 100%; height: 100%; aspect-ratio: 1 / 1; object-fit: cover; transform: scale(var(--ca-sc-s, 1));
   transition: transform var(--ca-sc-t) var(--ca-e1); transition-delay: calc(var(--dc, 1) * var(--ca-sc-stagger)); }
 .ca-scatter.is-armed .ca-cell img { --ca-sc-s: 0; }
 .ca-scatter.is-armed .ca-cell.is-in img { --ca-sc-s: 1; }
-.ca-cell-t { position: absolute; left: 0; top: calc(100% + 6px); white-space: nowrap; font: var(--ca-w-head) var(--ca-label)/1.3 var(--ca-f-head); color: var(--ca-ink); opacity: 0; pointer-events: none; transition: opacity var(--ca-t-line) var(--ca-e1); z-index: 2; }
+.ca-cell:nth-child(1) { --photo-width: 94%; }
+.ca-cell:nth-child(2) { --photo-drop: 24px; }
+.ca-cell:nth-child(3) { --photo-width: 82%; --photo-drop: 8px; }
+.ca-cell:nth-child(4) { --photo-width: 88%; --photo-drop: 16px; }
+.ca-cell:nth-child(5) { --photo-width: 105%; }
+.ca-space-group:nth-child(2) .ca-cell:nth-child(2) { --photo-drop: 10px; }
+.ca-space-group:nth-child(3) .ca-cell:nth-child(3) { --photo-drop: 28px; }
 @media (hover: hover) { .ca-cell:hover { transform: scale(var(--ca-sc-hover)); } }
-.ca-cell:hover .ca-cell-t, .ca-cell:focus-visible .ca-cell-t { opacity: 1; }
 .ca-scatter.is-linking .ca-cell { opacity: .25; }
 .ca-scatter.is-linking .ca-cell.is-hot { opacity: 1; transform: scale(var(--ca-sc-hover)); }
-@media (min-width: 769px) {
-  .ca-sec.ca-scatter { display: grid; grid-template-columns: repeat(var(--ca-cols), minmax(0, 1fr)); column-gap: var(--ca-gap); align-items: start; }
-  .ca-scatter > .ca-head { grid-column: 1 / -1; }
-  .ca-scatter > .ca-track { grid-column: 1 / span 4; margin-top: var(--ca-s2); }
-  .ca-scatter > .ca-field { grid-column: 5 / -1; margin-top: var(--ca-s2); }
-}
+.ca-scatter > .ca-track { margin-top: var(--ca-s2); }
 @media (max-width: 768px) {
+  .ca-space-group { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .ca-space-group > .ca-card, .ca-space-group > .ca-field { grid-column: 1 / -1; }
   .ca-field { grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: var(--ca-s2); }
-  .ca-cell { grid-column-start: var(--mcs, auto); grid-row-start: var(--mrs, auto); }
+  .ca-cell { grid-column-start: var(--mcs, auto); max-width: 100%; }
   .ca-cell img { transition-delay: calc(var(--mcs, 1) * var(--ca-sc-stagger)); }
-  .ca-cell-t { display: none; }
 }
 .m0 .ca-scatter .ca-cell, .m0 .ca-scatter .ca-cell img { transition: none !important; transform: none !important; }
 @media (prefers-reduced-motion: reduce) { .ca-cell, .ca-cell img { transition: none !important; } .ca-cell img { --ca-sc-s: 1 !important; } .ca-cell:hover, .ca-scatter.is-linking .ca-cell.is-hot { transform: none; } }
@@ -484,3 +514,10 @@ main > section:last-child:not(:has(.ca-rows)) { padding-bottom: var(--ca-s2); }
 [hidden] { display: none !important; }
 .ca-bar-b > .ca-gnb-c { grid-column: 9 / -1; }
 @media (max-width: 768px) { .ca-bar-b > .ca-gnb-c { grid-column: 4 / -1; } }
+
+/* Keep the gentle zoom inside the existing image frames. */
+:is(#s2, #s3, #s5) .ca-fig { overflow: hidden; }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  html:not(.m0) :is(#s2, #s3, #s5) .ca-fig img { transition: transform .45s ease; }
+  html:not(.m0) :is(#s2, #s3, #s5) .ca-fig:hover img { transform: scale(1.04); }
+}

@@ -131,12 +131,15 @@
   if (hImg) hImg.addEventListener('load', function () { heroText(); gnbState(); });
 
   /* ── 2-2. 상단 고정 바(GNB): 첫 화면 사진 위면 면 없이 글자색을 사진 명도로(§I-6, 못 재거나 애매하면 면), 본문 위면 바탕 88% 면 + 흐림(§I-5).
-     390: 이름 + Info 접기(누르면 펼침, Close ×·Esc·바깥 누르기로 닫힘) ── */
-  var gnb = $('.ca-gnb'), gBtn = gnb && $('.ca-gnb-btn', gnb), gMore = gnb && $('.ca-gnb-more', gnb);
+     모바일: 햄버거 메뉴, 선택·Esc·바깥 클릭으로 닫힘 ── */
+  var gnb = $('.ca-gnb'), gBtn = gnb && $('.ca-gnb-btn', gnb), gMenu = gnb && $('.ca-menu', gnb);
   function gnbH() { if (gnb) R.style.setProperty('--ca-gnb-h', Math.ceil(gnb.getBoundingClientRect().height) + 'px'); }
   function gnbOpen(on) {
     if (!gnb || !gBtn) return; gnb.classList.toggle('is-open', on); gBtn.setAttribute('aria-expanded', on ? 'true' : 'false');
-    $('span', gBtn).textContent = on ? 'Close ×' : 'Info'; gnbState();
+    gBtn.setAttribute('aria-label', on ? 'Close menu' : 'Open menu');
+    if (!on && D.activeElement.closest('.ca-menu') && gBtn.getClientRects().length) gBtn.focus({ preventScroll: true });
+    if (gMenu) gMenu.inert = !on && matchMedia('(max-width: 768px)').matches;
+    gnbState();
   }
   function gnbState() {
     if (!gnb) return;
@@ -144,7 +147,7 @@
     if (hImg && hTop && !gnb.classList.contains('is-open') && !detailOn) {
       var hb = hTop.getBoundingClientRect().bottom, gr = gnb.getBoundingClientRect();
       if (hb >= gr.bottom) {
-        var cells = $$('.ca-gnb-name, .ca-menu a', gnb).filter(function (k) { return k.offsetParent; }).map(function (k) { return k.getBoundingClientRect(); });
+        var cells = $$('.ca-gnb-name, .ca-gnb-btn, .ca-menu a', gnb).filter(function (k) { return k.offsetParent && !k.closest('[inert]'); }).map(function (k) { return k.getBoundingClientRect(); });
         var c = hImg.complete ? heroPick(gnb, cells, false) : null;
         if (c) { on = true; gnb.style.setProperty('--ca-gnb-c', css(c)); }
       }
@@ -154,17 +157,16 @@
   var gName = gnb && $('.ca-gnb-name a', gnb);
   if (gName) gName.addEventListener('click', function (e) {   /* 이름 = 메인(첫 화면)으로 — 상세가 열려 있으면 닫고 맨 위로 (2026-10-07 교수 지시) */
     e.preventDefault();
-    var wasOpen = detailOn;
+    gnbOpen(false);
     if (detailOn) closeDetail();
-    setTimeout(function () {   /* 상세를 닫은 직후의 포커스·위치 복귀가 끝난 뒤 맨 위로 */
-      R.style.scrollBehavior = 'auto'; window.scrollTo(0, 0); R.style.scrollBehavior = '';
-      if (history.replaceState) history.replaceState(null, '', location.pathname + location.search);
-    }, wasOpen ? 60 : 0);
+    window.scrollTo({ top: 0, behavior: MOTION === '0' ? 'auto' : 'smooth' });
+    history.replaceState(null, '', location.pathname + location.search);
   });
   if (gBtn) {
     gBtn.addEventListener('click', function () { gnbOpen(!gnb.classList.contains('is-open')); });
-    D.addEventListener('keydown', function (e) { if (e.key === 'Escape' && gnb.classList.contains('is-open')) { gnbOpen(false); gBtn.focus(); } });
+    D.addEventListener('keydown', function (e) { if (e.key === 'Escape' && gnb.classList.contains('is-open')) { e.preventDefault(); gnbOpen(false); gBtn.focus(); } });
     D.addEventListener('click', function (e) { if (gnb.classList.contains('is-open') && !gnb.contains(e.target)) gnbOpen(false); });
+    gnb.addEventListener('focusout', function (e) { if (!gnb.contains(e.relatedTarget)) gnbOpen(false); });
   }
   var gTick = false; addEventListener('scroll', function () { if (!gTick) { gTick = true; requestAnimationFrame(function () { gTick = false; gnbState(); }); } }, { passive: true });
 
@@ -216,25 +218,24 @@
     if (!N) return;
     /* 3장 공간(data-scatter) — W07-B 흩뿌림형 3장에서 이식(원 레퍼런스 lisovskiy.work).
        왼쪽 1–4단 = 공간 목록(이름 · 서브카피 · More), 오른쪽 5–12단 = 사진을 작은 정사각 칸에 흩어 둠(원 열 무늬, 390 = 3열).
-       칸이 화면에 들어오면 가운데 점에서 펴짐(.3초, 열 번호 × 15ms 지연 — --my-motion 0·reduced-motion이면 없음), 호버 1.05배 + 그 공간 이름, 클릭 → 상세 */
+       칸이 화면에 들어오면 가운데 점에서 펴짐(.3초, 열 번호 × 15ms 지연 — --my-motion 0·reduced-motion이면 없음), 호버 1.05배, 클릭 → 상세 */
     if (track.hasAttribute('data-scatter')) {
       var sec0 = track.closest('section'); sec0.classList.add('ca-scatter');
-      var DPAT = [4, 5, 7, 8, 5, 6, 9, 6, 7, 8, 5, 6], MPAT = [[2, 1], [3, 1], [1, 2], [2, 2], [3, 3], [2, 4], [1, 5], [2, 5], [3, 6], [2, 7], [3, 7], [2, 8]];
-      var COL12 = { 4: 1, 5: 2, 6: 4, 7: 5, 8: 7, 9: 8 };   /* 원 9열의 4~9열(오른쪽 2/3) → 오른쪽 8단 안 열 */
-      var field = D.createElement('div'); field.className = 'ca-field'; field.setAttribute('aria-label', '공간 사진');
-      var k = 0, cellsAll = [];
+      var columns = [[1, 4, 7, 2, 6], [2, 5, 8, 1, 5], [1, 3, 6, 3, 7]], cellsAll = [];
       function hot(i, on) { sec0.classList.toggle('is-linking', !!on); cards.forEach(function (c, j) { var h = on && i === j; c.classList.toggle('is-hot', h); (c._cells || []).forEach(function (x) { x.classList.toggle('is-hot', h); }); }); }
       cards.forEach(function (c, i) {
         c.classList.add('is-on'); c._cells = [];
         var nm = txtOf(c, '.ca-name');
+        var group = D.createElement('div'); group.className = 'ca-space-group';
+        track.insertBefore(group, c); group.appendChild(c);
+        var field = D.createElement('div'); field.className = 'ca-field'; field.setAttribute('aria-label', nm + ' photos');
+        group.appendChild(field);
         $$('.ca-fig img', c).forEach(function (im, j) {
-          var q = k % 12, rep = Math.floor(k / 12); k++;
           var b = D.createElement('button'); b.type = 'button'; b.className = 'ca-cell';
-          b.style.setProperty('--dcs', COL12[DPAT[q]]); b.style.setProperty('--dc', DPAT[q]);
-          b.style.setProperty('--mcs', MPAT[q][0]); b.style.setProperty('--mrs', MPAT[q][1] + rep * 8);
-          b.setAttribute('aria-label', nm + ' 사진 ' + (j + 1) + ' — 자세히'); b.setAttribute('aria-haspopup', 'dialog');
+          b.style.setProperty('--dcs', columns[i % 3][j % 5]); b.style.setProperty('--dc', j + 1);
+          b.style.setProperty('--mcs', j % 3 + 1); b.style.setProperty('--row', Math.floor(j / 3) + 1);
+          b.setAttribute('aria-label', nm + ', photo ' + (j + 1) + ' — View details'); b.setAttribute('aria-haspopup', 'dialog');
           var ci = D.createElement('img'); ci.src = im.getAttribute('src'); ci.alt = ''; ci.decoding = 'async'; b.appendChild(ci);
-          var lb = D.createElement('span'); lb.className = 'ca-cell-t'; lb.textContent = nm; lb.setAttribute('aria-hidden', 'true'); b.appendChild(lb);
           b.addEventListener('click', function () { openDetail(cards, i); });
           b.addEventListener('mouseenter', function () { hot(i, true); }); b.addEventListener('mouseleave', function () { hot(i, false); });
           b.addEventListener('focus', function () { hot(i, true); }); b.addEventListener('blur', function () { hot(i, false); });
@@ -243,9 +244,6 @@
         c.addEventListener('mouseenter', function () { hot(i, true); }); c.addEventListener('mouseleave', function () { hot(i, false); });
         c.addEventListener('click', function (e) { if (e.target.closest('.ca-cap, .ca-more')) openDetail(cards, i); });
       });
-      var minR = Math.min.apply(null, cellsAll.map(function (x) { return +x.style.getPropertyValue('--mrs'); }));
-      if (cellsAll.length && minR > 1) cellsAll.forEach(function (x) { x.style.setProperty('--mrs', +x.style.getPropertyValue('--mrs') - minR + 1); });
-      if (cellsAll.length) track.parentNode.insertBefore(field, track.nextSibling);   /* 사진 0장이면 칸 밭 없음 — 목록만 */
       if (MOTION !== '0' && 'IntersectionObserver' in window && cellsAll.length) {
         sec0.classList.add('is-armed');
         var io2 = new IntersectionObserver(function (es) { es.forEach(function (e) { e.target.classList.toggle('is-in', e.isIntersecting); }); }, { rootMargin: '0px 0px -8% 0px', threshold: 0 });
@@ -350,8 +348,8 @@
   /* ── 6. 상세 ── */
   var dl = D.createElement('div');
   dl.className = 'ca-detail'; dl.id = 'ca-detail'; dl.setAttribute('role', 'dialog'); dl.setAttribute('aria-labelledby', 'ca-d-t'); dl.tabIndex = -1;
-  /* 상세 순서 = 사진(원본 비율) → [번호 이름] → 본 것·언제 → 해석·고른 이유(본문보다 한 단계 큰 글) → Prev/Next. Return 없음 — 닫기: Esc · 상단 바 제목 · 장 메뉴 · 뒤로가기 (2026-10-07) */
-  dl.innerHTML = '<div class="ca-d-in"><div class="ca-d-grid ca-row"></div><div class="ca-d-txt"><div class="ca-d-head"><p class="ca-d-name"><span class="ca-n ca-d-n"></span><span class="ca-d-t" id="ca-d-t"></span></p>'
+  /* Back stays visible while the original-ratio photos scroll. */
+  dl.innerHTML = '<div class="ca-d-toolbar"><button type="button" class="ca-d-back" aria-label="Back to archive">← Back</button></div><div class="ca-d-in"><div class="ca-d-grid ca-row"></div><div class="ca-d-txt"><div class="ca-d-head"><p class="ca-d-name"><span class="ca-n ca-d-n"></span><span class="ca-d-t" id="ca-d-t"></span></p>'
     + '<p class="ca-d-when"></p></div>'
     + '<p class="ca-d-why"></p></div>'
     + '</div>'
@@ -361,12 +359,13 @@
   var detailBackground = $$('.ca-top, main');
   $$('.ca-open, .ca-more, .ca-cell').forEach(function (b) {
     b.setAttribute('aria-haspopup', 'dialog'); b.setAttribute('aria-controls', dl.id);
-    if (b.classList.contains('ca-more')) b.setAttribute('aria-label', txtOf(b.closest('.ca-card'), '.ca-name') + ' 자세히');
+    if (b.classList.contains('ca-more')) b.setAttribute('aria-label', 'More about ' + txtOf(b.closest('.ca-card'), '.ca-name'));
   });
   var dCards = [], dAt = 0, dDone = null, back = null;
   function txt(c, s) { var e = $(s, c); return e ? e.textContent.trim() : ''; }
   function fill(i) {
     var N = dCards.length; dAt = (i + N) % N; var c = dCards[dAt];
+    dl.classList.toggle('is-objects', !!c.closest('#s5'));
     $('.ca-d-n', dl).textContent = '[' + pad(dAt + 1) + ']';
     $('.ca-d-t', dl).textContent = txt(c, '.ca-name');
     var dw = $('.ca-d-when', dl); dw.textContent = txt(c, '.ca-when'); dw.hidden = !dw.textContent;
@@ -386,14 +385,14 @@
     var pv = $('.ca-d-prev', dl), nx = $('.ca-d-next', dl); pv.hidden = nx.hidden = N < 2;   /* 지금은 순환(첫↔끝) — 교수 확인 전까지 유지 */
     var pn = txt(dCards[(dAt - 1 + N) % N], '.ca-name'), nn = txt(dCards[(dAt + 1) % N], '.ca-name');
     $('b', pv).textContent = pn; $('b', nx).textContent = nn;
-    pv.setAttribute('aria-label', '이전 항목: ' + pn); nx.setAttribute('aria-label', '다음 항목: ' + nn);
+    pv.setAttribute('aria-label', 'Previous item: ' + pn); nx.setAttribute('aria-label', 'Next item: ' + nn);
     dl.scrollTop = 0;
   }
   function openDetail(cards, i, done) {
-    dCards = cards; dDone = done || null; back = D.activeElement; fill(i); detailOn = true; tracks.forEach(function (t) { t.arm(); });
+    dCards = cards; dDone = done || null; back = D.activeElement.closest('main') ? D.activeElement : $('.ca-open', cards[i]); fill(i); detailOn = true; tracks.forEach(function (t) { t.arm(); });
     dl.classList.add('is-on'); R.classList.add('ca-lock');
     detailBackground.forEach(function (el) { el.inert = true; });
-    setTimeout(function () { dl.focus({ preventScroll: true }); }, 30);
+    $('.ca-d-back', dl).focus({ preventScroll: true });
     if (history.pushState && !(history.state && history.state.caDetail)) history.pushState({ caDetail: 1 }, '');
   }
   function closeDetail() {
@@ -401,11 +400,15 @@
     dl.classList.remove('is-on'); R.classList.remove('ca-lock'); detailOn = false;
     detailBackground.forEach(function (el) { el.inert = false; });
     if (dDone) dDone(dAt);
-    var t = $('.ca-open', dCards[dAt]) || back; if (t && t.focus) t.focus({ preventScroll: true });
-    if (stacked()) dCards[dAt].scrollIntoView({ block: 'nearest' });
+    if (back && back.focus) back.focus({ preventScroll: true });
     tracks.forEach(function (t) { t.arm(); });
   }
   addEventListener('popstate', function () { if (detailOn) closeDetail(); });   /* 브라우저 뒤로가기 = 상세 닫기 */
+  function returnToArchive() {
+    if (history.state && history.state.caDetail) history.back();
+    else closeDetail();
+  }
+  $('.ca-d-back', dl).addEventListener('click', returnToArchive);
   $('.ca-d-prev', dl).addEventListener('click', function () { fill(dAt - 1); });
   $('.ca-d-next', dl).addEventListener('click', function () { fill(dAt + 1); });
   /* 터치: 좌우 스와이프(가로 이동 50px 이상 · 세로보다 클 때만 — 세로 스크롤은 가로채지 않음) */
@@ -416,13 +419,13 @@
     if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) fill(dAt + (dx < 0 ? 1 : -1));
   }, { passive: true });
   D.addEventListener('keydown', function (e) {
-    if (!detailOn) return;
-    if (e.key === 'Escape') { e.preventDefault(); closeDetail(); }
+    if (!detailOn || e.defaultPrevented) return;
+    if (e.key === 'Escape') { e.preventDefault(); returnToArchive(); }
     else if (e.key === 'ArrowRight' && dCards.length > 1) { e.preventDefault(); fill(dAt + 1); }
     else if (e.key === 'ArrowLeft' && dCards.length > 1) { e.preventDefault(); fill(dAt - 1); }
     else if (e.key === 'Tab') {
       /* 상단 메뉴도 상세를 닫는 수단이므로 키보드 이동에 포함한다. */
-      var f = $$('.ca-gnb a').concat($$('button:not([hidden])', dl)).filter(function (el) { return el.getClientRects().length; });
+      var f = $$('.ca-gnb a, .ca-gnb-btn').concat($$('button:not([hidden])', dl)).filter(function (el) { return el.getClientRects().length && !el.closest('[inert]'); });
       if (!f.length) return;
       var at = f.indexOf(D.activeElement), next = e.shiftKey ? (at <= 0 ? f.length - 1 : at - 1) : (at + 1) % f.length;
       e.preventDefault(); f[next].focus();
@@ -432,7 +435,12 @@
   /* ── 7. 하단 메뉴: 현재 위치 ── */
   var links = $$('.ca-menu a'), secs = links.map(function (a) { var id = (a.getAttribute('href') || '').slice(1); return id ? D.getElementById(id) : null; });
   links.forEach(function (a, i) { if (!secs[i]) REPORT.push('메뉴 연결 없음: ' + a.textContent.trim()); a.innerHTML = '<span>' + a.innerHTML + '</span>'; });
-  links.forEach(function (a) { a.addEventListener('click', function () { if (detailOn) closeDetail(); }); });   /* 장 메뉴 = 상세 닫고 그 장으로 */
+  links.forEach(function (a, i) { a.addEventListener('click', function (e) {
+    if (!secs[i]) return;
+    e.preventDefault(); gnbOpen(false); if (detailOn) closeDetail();
+    secs[i].scrollIntoView({ block: 'start', behavior: MOTION === '0' ? 'auto' : 'smooth' });
+    history.replaceState(null, '', a.getAttribute('href'));
+  }); });
   function current() {
     var y = innerHeight * .4, on = -1;
     secs.forEach(function (s, i) { if (s && s.getBoundingClientRect().top <= y) on = i; });
@@ -487,7 +495,7 @@
   function menuH() { if (menuEl) R.style.setProperty('--ca-menu-h', Math.ceil(menuEl.getBoundingClientRect().height) + 'px'); }
 
   /* ── 9. 시작 · 크기 변화 ── */
-  function relayout() { fitH1(); tracks.forEach(function (t) { t.layout(); }); current(); menuH(); gnbH(); syncBase(); heroText(); if (gnb && !matchMedia('(max-width: 768px)').matches) gnbOpen(false); gnbState(); }
+  function relayout() { fitH1(); tracks.forEach(function (t) { t.layout(); }); current(); menuH(); gnbH(); syncBase(); heroText(); if (gnb) gnbOpen(matchMedia('(max-width: 768px)').matches && gnb.classList.contains('is-open')); gnbState(); }
   /* 카드 서브카피 2~5줄(상한 5줄) — 자르지 않고 보고 줄만(COMMON_RULES §2) */
   function subLimit() {
     $$('.ca-card').forEach(function (c) {

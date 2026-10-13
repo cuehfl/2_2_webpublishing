@@ -10,7 +10,7 @@
   --my-point: none;
 
   /* ③ 서체 짝   sans 고딕(기본) · serif 명조 · mono 고정폭 · hand 둥근 손글씨 */
-  --my-type: sans;
+  --my-type: sans; /* 콘텐츠 Geist · 탐색 메뉴와 버튼 Geist Mono */
 
   /* ④ 움직임   0 조용함(자동 넘김·전환 없음) · 1 기본 · 2 강함 */
   --my-motion: 1;
